@@ -19,8 +19,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("DRA demo: handshake accepted");
     println!("protocol version: {}", challenge.version);
     println!("nonce: {}", hex::encode(challenge.nonce));
+    println!("rule family: {:?}", challenge.rule.kind);
     println!(
-        "rule: {}*x + {} = {} (mod {})",
+        "rule parameters: a={}, b={}, y={} (mod {})",
         challenge.rule.a,
         challenge.rule.b,
         challenge.rule.y,

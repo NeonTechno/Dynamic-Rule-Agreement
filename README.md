@@ -2,9 +2,10 @@
 
 **Status: experimental research prototype — not production-ready.**
 
-DRA explores a dynamic challenge-response handshake that combines:
+DRA explores a versioned challenge-response handshake that combines:
 - a fresh random nonce;
-- a per-session modular-arithmetic relation and SHA-256 commitment;
+- random selection between two registered toy rule families (`Affine` and `ScaledOffset`), or explicit selection for testing/policy;
+- a SHA-256 commitment that binds the rule-family identifier, parameters, nonce, timestamp, modulus, and protocol version;
 - a response containing a witness to that relation;
 - Ed25519 authentication of the response transcript;
 - freshness checks and in-process replay prevention.
@@ -33,10 +34,16 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 ## Protocol sketch
 
-1. Verifier creates a nonce and a dynamic rule.
+1. Verifier creates a nonce and selects a registered rule family; the family identifier is included in the commitment.
 2. Peer checks the relation and signs a transcript bound to the challenge.
 3. Verifier checks protocol version, freshness, commitment, relation, and signature.
 4. Verifier consumes the nonce to reject a replay within its process.
+
+## Dynamic rule engine (v2)
+
+The challenge now identifies one of two rule families: `Affine` (`y = a*x + b mod p`) or `ScaledOffset` (`y = a*(x + b) mod p`). `Challenge::generate()` selects a family using the operating-system random source; `Challenge::generate_with_rule()` lets tests and future negotiated policies choose one explicitly. The selected family is committed, so changing it after challenge creation invalidates the commitment. This is dynamic rule selection, not dynamic cryptographic hardness: both relations are intentionally easy to solve and do not add security beyond the signature.
+
+This changes the challenge commitment format and bumps the protocol/domain version to v2. Do not mix v1 and v2 peers; a future network transport must negotiate supported versions and reject unknown rule IDs explicitly.
 
 ## Research roadmap
 
