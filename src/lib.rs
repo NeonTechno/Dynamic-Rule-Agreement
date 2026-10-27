@@ -74,10 +74,11 @@ impl Challenge {
     /// Generate a fresh challenge using the operating system CSPRNG.
     pub fn generate(now_unix: u64) -> Self {
         let mut rng = OsRng;
-        let mut nonce = [0_u8; 32];
-        rng.fill_bytes(&mut nonce);
-
-        let kind = if rng.next_u32() & 1 == 0 { RuleKind::Affine } else { RuleKind::ScaledOffset };
+        let kind = if rng.next_u32() & 1 == 0 {
+            RuleKind::Affine
+        } else {
+            RuleKind::ScaledOffset
+        };
         Self::generate_with_rule(now_unix, kind)
     }
 
@@ -125,8 +126,7 @@ impl Challenge {
             }
         };
 
-        if evaluate_rule(self.rule.kind, self.rule.a, self.rule.b, witness) != self.rule.y
-        {
+        if evaluate_rule(self.rule.kind, self.rule.a, self.rule.b, witness) != self.rule.y {
             return Err(DraError::InvalidRuleProof);
         }
 
@@ -176,8 +176,12 @@ impl Verifier {
             return Err(DraError::InvalidCommitment);
         }
         if response.witness >= MODULUS
-            || evaluate_rule(challenge.rule.kind, challenge.rule.a, challenge.rule.b, response.witness)
-                != challenge.rule.y
+            || evaluate_rule(
+                challenge.rule.kind,
+                challenge.rule.a,
+                challenge.rule.b,
+                response.witness,
+            ) != challenge.rule.y
         {
             return Err(DraError::InvalidRuleProof);
         }
@@ -305,7 +309,9 @@ mod tests {
             let challenge = Challenge::generate_with_rule(now, kind);
             let response = challenge.respond(&client).expect("response");
             let mut verifier = Verifier::new(30);
-            verifier.verify(&challenge, &response, &client.verifying_key(), now + 1).unwrap();
+            verifier
+                .verify(&challenge, &response, &client.verifying_key(), now + 1)
+                .unwrap();
         }
     }
 
