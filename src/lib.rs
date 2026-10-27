@@ -13,11 +13,10 @@ use thiserror::Error;
 
 /// A 61-bit Mersenne prime used for the toy equation layer.
 pub const MODULUS: u64 = (1_u64 << 61) - 1;
-pub const PROTOCOL_VERSION: u16 = 1;
-const DOMAIN_CHALLENGE: &[u8] = b"DRA/challenge/v1";
-const DOMAIN_RESPONSE: &[u8] = b"DRA/response/v1";
+pub const PROTOCOL_VERSION: u16 = 2;
+const DOMAIN_CHALLENGE: &[u8] = b"DRA/challenge/v2";
+const DOMAIN_RESPONSE: &[u8] = b"DRA/response/v2";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// Identifier for the mathematical relation used by a challenge.
 /// These are toy relations, not cryptographic primitives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
